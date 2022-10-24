@@ -1,0 +1,1 @@
+docker run --interactive --tty --publish 9000:8080 --rm aws-lambda-contact-us:latest
