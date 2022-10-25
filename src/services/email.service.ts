@@ -3,6 +3,7 @@ import {
   SendEmailCommandInput,
   SESClient,
 } from '@aws-sdk/client-ses';
+import { ContactUsForm } from '../models/contact-form-us.interface';
 
 export class EmailService {
   private sesInstance: SESClient;
@@ -12,27 +13,25 @@ export class EmailService {
   }
 
   async sendMessage(
-    validatedEmailAddress: string,
+    sourceEmailAddress: string,
+    contactForm: ContactUsForm,
   ): Promise<string | undefined> {
     const emailParams: SendEmailCommandInput = {
-      Source: validatedEmailAddress,
-      ReplyToAddresses: ['christopher@shermandigital.com'],
+      Source: sourceEmailAddress,
+      ReplyToAddresses: [sourceEmailAddress],
       Destination: {
-        ToAddresses: ['chrisjsherm@gmail.com'],
+        ToAddresses: [contactForm.fromEmailAddress],
       },
       Message: {
         Body: {
           Text: {
             Charset: 'UTF-8',
-            Data:
-              'This completes the test of the Lambda function for the ' +
-              'contact form from Sherman Digital.\n' +
-              'Thank you for your participation.',
+            Data: contactForm.message,
           },
         },
         Subject: {
           Charset: 'UTF-8',
-          Data: 'New message from Christopher | Sherman Digital',
+          Data: contactForm.subject,
         },
       },
     };
