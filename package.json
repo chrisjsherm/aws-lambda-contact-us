@@ -10,6 +10,9 @@
   },
   "author": "Sherman Digital, LLC",
   "license": "MIT",
+  "dependencies": {
+    "@aws-sdk/client-ses": "^3.194.0"
+  },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.108",
     "@types/jest": "^29.2.0",
@@ -24,8 +27,5 @@
     "prettier": "^2.7.1",
     "ts-jest": "^29.0.3",
     "typescript": "^4.8.4"
-  },
-  "dependencies": {
-    "@aws-sdk/client-ses": "^3.194.0"
   }
 }

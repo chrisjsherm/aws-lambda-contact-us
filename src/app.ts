@@ -1,4 +1,5 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from 'aws-lambda';
+import { validateEmailAddress } from './helpers/validate-email-address.helper';
 import { EmailService } from './services/email.service';
 
 const emailService = new EmailService();
@@ -25,8 +26,20 @@ export const handler = async function handleRequest(
     };
   }
 
+  if (validateEmailAddress(emailAddress) === false) {
+    const message =
+      'ValidatedEmailAddress parameter is not a valid email address.';
+    console.error(message);
+    return {
+      ...baseErrorResponse,
+      body: message,
+    };
+  }
+
   try {
-    await emailService.sendMessage(emailAddress);
+    const messageId = await emailService.sendMessage(emailAddress);
+
+    console.log(`Email sent with ID ${messageId}.`);
     return {
       statusCode: 204,
       headers,
