@@ -16,33 +16,30 @@ export class EmailService {
   ): Promise<string | undefined> {
     const emailParams: SendEmailCommandInput = {
       Source: validatedEmailAddress,
-      ReplyToAddresses: [validatedEmailAddress],
+      ReplyToAddresses: ['christopher@shermandigital.com'],
       Destination: {
-        ToAddresses: [validatedEmailAddress],
+        ToAddresses: ['chrisjsherm@gmail.com'],
       },
       Message: {
         Body: {
           Text: {
             Charset: 'UTF-8',
-            Data: 'Testing contact-us Lambda function',
+            Data:
+              'This completes the test of the Lambda function for the ' +
+              'contact form from Sherman Digital.\n' +
+              'Thank you for your participation.',
           },
         },
         Subject: {
           Charset: 'UTF-8',
-          Data: 'New message from Christopher',
+          Data: 'New message from Christopher | Sherman Digital',
         },
       },
     };
 
     const sendEmailCommand = new SendEmailCommand(emailParams);
 
-    return new Promise(async (resolve, reject) => {
-      try {
-        const { MessageId } = await this.sesInstance.send(sendEmailCommand);
-        resolve(MessageId);
-      } catch (err) {
-        reject(err);
-      }
-    });
+    const { MessageId } = await this.sesInstance.send(sendEmailCommand);
+    return MessageId;
   }
 }
