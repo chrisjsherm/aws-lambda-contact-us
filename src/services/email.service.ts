@@ -18,9 +18,9 @@ export class EmailService {
   ): Promise<string | undefined> {
     const emailParams: SendEmailCommandInput = {
       Source: sourceEmailAddress,
-      ReplyToAddresses: [sourceEmailAddress],
+      ReplyToAddresses: [contactForm.fromEmailAddress],
       Destination: {
-        ToAddresses: [contactForm.fromEmailAddress],
+        ToAddresses: [sourceEmailAddress],
       },
       Message: {
         Body: {
