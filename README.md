@@ -11,7 +11,7 @@ a Docker image.
 
 ## Configuration
 
-The handler assumes you can configured a Lambda environment variable named
+The handler assumes you configured a Lambda environment variable named
 `ValidatedEmailAddress` and set its value to a valid email address that you have
 [pre-verified with AWS SES](https://docs.aws.amazon.com/ses/latest/dg/creating-identities.html#verify-email-addresses-procedure).
 
