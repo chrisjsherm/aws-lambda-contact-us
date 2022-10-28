@@ -1,10 +1,10 @@
-# Lambda container to handle "contact us" form
+# Lambda Docker image to handle "contact us" form
 
-Lambda function that receives a POST of a "contact us" form and generates an
-email via AWS Simple Email Service (SES).
+Handle a POST of a "contact us" form and generate an email with its contents via
+AWS Simple Email Service (SES) using this Lambda Function.
 
-This repository contains a Dockerfile so you can deploy the Lambda function as
-a Docker image.
+This repository contains a Dockerfile for deploying the Lambda function as a
+Docker image.
 
 > Note: The handler assumes you are calling the Lambda function directly by
 > configuring a Lambda function URL rather than proxying through an API Gateway.
@@ -15,13 +15,25 @@ The handler assumes you configured a Lambda environment variable named
 `ValidatedEmailAddress` and set its value to a valid email address that you have
 [pre-verified with AWS SES](https://docs.aws.amazon.com/ses/latest/dg/creating-identities.html#verify-email-addresses-procedure).
 
-The JSON payload must match the shape of `src/models/contact-form-us.interface.ts`.
+The JSON payload of the POST request must match the shape of
+`src/models/contact-form-us.interface.ts`.
+
+## CloudFormation
+
+This repository is designed to be referenced by a
+[contact form handler CloudFormation template](https://github.com/chrisjsherm/aws-cf-contact-form-handler). To use with the template, fork this repository and
+use the HTTPS clone link to set the `GitHubSourceHTTPS` parameter in the
+CloudFormation template.
 
 ## Build
 
 The `buildspec.yml` file contains configuration for AWS CodeBuild. It builds a
 Docker image based on AWS' Lambda image and then deploys to an ECR repository
 named `aws-lambda-contact-us`.
+
+The `buildspec.yml` file has several environment variables it assumes are set
+by CloudFormation. If you do not use the CloudFormation template referenced
+above, you will need to take care of setting these environment variables.
 
 ## Tests
 

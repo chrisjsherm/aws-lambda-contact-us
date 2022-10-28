@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc --build --verbose",
     "lint": "eslint 'src/**/*.{js,ts}' --cache --fix",
-    "test": "jest --watchAll"
+    "test": "jest --watchAll",
+    "test:cli": "npx jest --ci --json --coverage --testLocationInResults --outputFile=./coverage/cli-report.json"
   },
   "author": "Sherman Digital, LLC",
   "license": "MIT",
