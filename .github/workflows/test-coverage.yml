@@ -18,5 +18,5 @@ jobs:
           message: ${{ steps.coverage.outputs.report }}
       - uses: reviewdog/action-eslint@v1
         with:
-          github_token: ${{ github.token }}
           reporter: github-pr-review
+          fail_on_error: true
