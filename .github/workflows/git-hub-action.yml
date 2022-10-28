@@ -9,23 +9,24 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
-      # https://github.com/marketplace/actions/jest-coverage-report
-      - uses: ArtiomTr/jest-coverage-report-action@v2
-        id: coverage
-        with:
-          output: report-markdown      
-      - uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          message: ${{ steps.coverage.outputs.report }}
+      # # https://github.com/marketplace/actions/jest-coverage-report
+      # - uses: ArtiomTr/jest-coverage-report-action@v2
+      #   id: coverage
+      #   with:
+      #     output: report-markdown      
+      # - uses: marocchino/sticky-pull-request-comment@v2
+      #   with:
+      #     message: ${{ steps.coverage.outputs.report }}
 
-      # https://github.com/marketplace/actions/run-eslint-with-reviewdog 
-      - uses: reviewdog/action-eslint@v1
-        with:
-          reporter: github-pr-review
-          fail_on_error: true
+      # # https://github.com/marketplace/actions/run-eslint-with-reviewdog 
+      # - uses: reviewdog/action-eslint@v1
+      #   with:
+      #     reporter: github-pr-review
+      #     fail_on_error: true
 
       # https://github.com/marketplace/actions/deploy-to-gist
-      - run: npm run make-badges
+      - run: npm ci
+      - run:  npx coverage-badger --reportFile coverage/clover.xml --destinationDir assets/
       - name: Deploy to Gist
         uses: exuanbo/actions-deploy-gist@v1
         with:
