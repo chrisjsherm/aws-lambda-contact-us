@@ -1,0 +1,38 @@
+name: 'continuous-integration'
+on:
+  pull_request:
+    branches:
+      - master
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      # https://github.com/marketplace/actions/jest-coverage-report
+      - uses: ArtiomTr/jest-coverage-report-action@v2
+        id: coverage
+        with:
+          coverage-file: ./coverage/coverage-final.json
+          test-script: npx jest --ci --json --coverage --testLocationInResults --outputFile=coverage/report.json
+          output: report-markdown      
+      - uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          message: ${{ steps.coverage.outputs.report }}
+
+      # https://github.com/marketplace/actions/run-eslint-with-reviewdog 
+      - uses: reviewdog/action-eslint@v1
+        with:
+          reporter: github-pr-review
+          fail_on_error: true
+
+      - run: npm run make-badges
+      - name: Deploy to Gist
+        uses: exuanbo/actions-deploy-gist@v1
+        with:
+          token: ${{ secrets.TOKEN }}
+          gist_id: 6f03529f7bc37ac7720e5d9680b5894d
+          gist_description: Code coverage percentage
+          file_path: coverage/coverage.svg
+          file_type: binary
+

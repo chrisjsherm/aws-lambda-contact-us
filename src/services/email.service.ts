@@ -3,7 +3,7 @@ import {
   SendEmailCommandInput,
   SESClient,
 } from '@aws-sdk/client-ses';
-import { ContactUsForm } from '../models/contact-form-us.interface';
+import { ContactUsForm } from '../models/contact-us-form.class';
 
 export class EmailService {
   private sesInstance: SESClient;
