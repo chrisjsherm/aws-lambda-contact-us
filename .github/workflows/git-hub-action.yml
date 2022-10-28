@@ -13,8 +13,6 @@ jobs:
       - uses: ArtiomTr/jest-coverage-report-action@v2
         id: coverage
         with:
-          coverage-file: ./coverage/coverage-final.json
-          test-script: npx jest --ci --json --coverage --testLocationInResults --outputFile=coverage/report.json
           output: report-markdown      
       - uses: marocchino/sticky-pull-request-comment@v2
         with:
