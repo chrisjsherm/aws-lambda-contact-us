@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      # https://github.com/marketplace/actions/jest-coverage-report
       - uses: ArtiomTr/jest-coverage-report-action@v2
         id: coverage
         with:
@@ -15,3 +16,7 @@ jobs:
       - uses: marocchino/sticky-pull-request-comment@v2
         with:
           message: ${{ steps.coverage.outputs.report }}
+      - uses: reviewdog/action-eslint@v1
+        with:
+          github_token: ${{ github.token }}
+          reporter: github-pr-review
