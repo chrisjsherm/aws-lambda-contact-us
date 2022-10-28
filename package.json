@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc --build --verbose",
     "lint": "eslint 'src/**/*.{js,ts}' --cache --fix",
-    "make-badges": "coverage-badger --reportFile coverage/clover.xml --destinationDir assets/",
+    "make-badges": "coverage-badger --reportFile coverage/clover.xml --destinationDir coverage/",
     "test": "jest --watchAll --coverage"
   },
   "author": "Sherman Digital, LLC",
