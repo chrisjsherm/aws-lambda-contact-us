@@ -4,3 +4,4 @@ dist
 node_modules
 
 shell-scripts/push-to-ecr.sh
+todo.txt

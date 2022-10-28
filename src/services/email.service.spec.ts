@@ -1,10 +1,11 @@
 import { SendEmailCommand, SESClient } from '@aws-sdk/client-ses';
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
+import { ContactUsForm } from '../models/contact-us-form.class';
 import { EmailService } from './email.service';
 
 describe('Email service', (): void => {
-  let sesMock = mockClient(SESClient);
+  const sesMock = mockClient(SESClient);
   let service: EmailService;
 
   beforeEach((): void => {
@@ -24,7 +25,15 @@ describe('Email service', (): void => {
     });
 
     // Act
-    const result = await service.sendMessage('email@example.com');
+    const result = await service.sendMessage(
+      'email@example.com',
+      new ContactUsForm(
+        'Dan',
+        'danno@gmail.com',
+        'Hello, World',
+        'Good morning',
+      ),
+    );
 
     // Assert
     expect(result).toEqual('123');
@@ -38,7 +47,17 @@ describe('Email service', (): void => {
     });
 
     // Assert
-    expect(() => service.sendMessage('email@example.com')).rejects.toThrow();
+    expect(() =>
+      service.sendMessage(
+        'email@example.com',
+        new ContactUsForm(
+          'Dan',
+          'danno@gmail.com',
+          'Hello, World',
+          'Good morning',
+        ),
+      ),
+    ).rejects.toThrow();
     expect(sesMock).toHaveReceivedCommandTimes(SendEmailCommand, 1);
   });
 });

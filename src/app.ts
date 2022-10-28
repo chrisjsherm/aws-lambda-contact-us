@@ -1,9 +1,9 @@
-import { APIGatewayEvent, APIGatewayProxyResultV2 } from 'aws-lambda';
+import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { parseRequestBody } from './helpers/parse-request-body.helper';
 import { validateEmailAddress } from './helpers/validate-email-address.helper';
-import { ContactUsForm } from './models/contact-form-us.interface';
+import { ContactUsForm } from './models/contact-us-form.class';
 import { EmailService } from './services/email.service';
 
-const emailService = new EmailService();
 const headers = {
   'content-type': 'text/plain; charset=utf-8',
 };
@@ -12,104 +12,39 @@ const baseErrorResponse = {
   headers,
 };
 
+export const dependencies = {
+  /**
+   * Initialize dependencies to give us a hook for mocking in tests
+   *
+   * @returns Dependencies object
+   */
+  init: async (): Promise<{
+    emailService: EmailService;
+  }> => {
+    return Promise.resolve({
+      emailService: new EmailService(),
+    });
+  },
+};
+
 /**
- * Parse request body, ensuring it is well-formed
+ * Lambda Function handler for "contact us" form
  *
- * @param body Request body
- * @returns Parsed request body
+ * @param event API Gateway/Lambda Function URL event
+ * @returns Result of SES request
  */
-function parseRequestBody(body: string | null): ContactUsForm {
-  console.log('Validating request.');
-
-  const badRequest = {
-    statusCode: 400,
-    headers: {
-      'content-type': 'text/plain; charset=utf-8',
-    },
-  };
-
-  if (body === undefined || body === null) {
-    throw new Error(
-      JSON.stringify({
-        ...badRequest,
-        body: 'Request body is missing.',
-      }),
-    );
-  }
-
-  let jsonBody;
-  try {
-    jsonBody = JSON.parse(body) as ContactUsForm;
-  } catch (err) {
-    console.error(err);
-    console.log(body);
-    throw new Error(
-      JSON.stringify({
-        ...badRequest,
-        body: 'Request body is malformed. Error parsing JSON',
-      }),
-    );
-  }
-
-  const errors: string[] = [];
-  if (jsonBody.fromEmailAddress === undefined) {
-    errors.push(
-      'Property "fromEmailAddress" is missing from the request body.',
-    );
-  } else if (typeof jsonBody.fromEmailAddress !== 'string') {
-    errors.push('Property "fromEmailAddress" must be a string.');
-  } else if (validateEmailAddress(jsonBody.fromEmailAddress) === false) {
-    errors.push('Property "fromEmailAddress" must be a valid email address.');
-  } else if (jsonBody.fromEmailAddress.length >= 256) {
-    errors.push(
-      'Property "fromEmailAddress" must be less than 256 characters.',
-    );
-  }
-
-  if (jsonBody.subject === undefined) {
-    errors.push('Property "subject" is missing from the request body.');
-  } else if (typeof jsonBody.subject !== 'string') {
-    errors.push('Property "subject" must be a string.');
-  } else if (jsonBody.subject.length >= 100) {
-    errors.push('Property "subject" must be less than 100 characters.');
-  }
-
-  if (jsonBody.message === undefined) {
-    errors.push('Property "message" is missing from the request body.');
-  } else if (typeof jsonBody.message !== 'string') {
-    errors.push('Property "message" must be a string.');
-  } else if (jsonBody.message.length >= 1028) {
-    errors.push('Property "message" must be less than 1028 characters.');
-  }
-
-  if (errors.length > 0) {
-    throw new Error(
-      JSON.stringify({
-        ...badRequest,
-        body: errors.join('\n'),
-      }),
-    );
-  }
-
-  return jsonBody;
-}
-
 export const handler = async function handleRequest(
   event: APIGatewayEvent,
-): Promise<APIGatewayProxyResultV2> {
-  console.log('Entered handler.');
-
+): Promise<APIGatewayProxyResult> {
   const emailAddress = process.env['ValidatedEmailAddress'];
-  if (!emailAddress) {
+  if (emailAddress === undefined) {
     const message = 'ValidatedEmailAddress parameter is not set.';
     console.error(message);
     return {
       ...baseErrorResponse,
       body: message,
     };
-  }
-
-  if (validateEmailAddress(emailAddress) === false) {
+  } else if (validateEmailAddress(emailAddress) === false) {
     const message =
       'ValidatedEmailAddress parameter is not a valid email address.';
     console.error(message);
@@ -119,26 +54,39 @@ export const handler = async function handleRequest(
     };
   }
 
+  let contactForm: ContactUsForm;
   try {
-    const contactForm = parseRequestBody(event.body);
-    console.log(contactForm);
+    contactForm = parseRequestBody(event.body);
+  } catch (err: unknown) {
+    console.error(`Error occurred: ${(err as { body: string }).body}`);
+    return err as APIGatewayProxyResult;
+  }
 
-    contactForm.subject = `${contactForm.subject} ${process.env['EmailSubjectSuffix']}`;
+  try {
+    if (process.env['EmailSubjectSuffix']) {
+      contactForm.subject = `${contactForm.subject} ${process.env['EmailSubjectSuffix']}`;
+    }
+
+    const { emailService } = await dependencies.init();
 
     const messageId = await emailService.sendMessage(emailAddress, contactForm);
 
-    console.log(`Email sent with ID ${messageId}.`);
+    const result = `Email sent with SES ID ${messageId}.`;
+    console.info(result);
     return {
-      statusCode: 204,
+      statusCode: 201,
       headers,
+      body: result,
     };
   } catch (err: unknown) {
     if (!(err instanceof Error)) {
-      return baseErrorResponse;
+      return {
+        ...baseErrorResponse,
+        body: err as string,
+      };
     }
 
-    console.error('Error occurred.');
-
+    console.error(`Error occurred: ${err.message}`);
     return {
       ...baseErrorResponse,
       body: err.message,
