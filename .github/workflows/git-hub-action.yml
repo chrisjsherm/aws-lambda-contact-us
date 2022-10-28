@@ -26,6 +26,7 @@ jobs:
           reporter: github-pr-review
           fail_on_error: true
 
+      # https://github.com/marketplace/actions/deploy-to-gist
       - run: npm run make-badges
       - name: Deploy to Gist
         uses: exuanbo/actions-deploy-gist@v1
