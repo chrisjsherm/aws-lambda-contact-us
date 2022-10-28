@@ -4,7 +4,7 @@ on:
     branches:
       - master
 jobs:
-  test:
+  enforce-quality:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -15,13 +15,13 @@ jobs:
           node-version: '16'
           cache: 'npm'
 
-      - name: Install dependencies
       - run: npm clean-install
 
       - run: npx eslint 'src/**/*.{js,ts}' --cache
             
       - run: npx jest --ci --json --coverage --testLocationInResults --outputFile=coverage/report.json
       - run: npm run make-badges
+      
       - name: Deploy to Gist
         uses: exuanbo/actions-deploy-gist@v1
         with:
