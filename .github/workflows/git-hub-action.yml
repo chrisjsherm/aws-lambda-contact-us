@@ -11,10 +11,13 @@ jobs:
       - run: npm clean-install
 
       # https://github.com/marketplace/actions/jest-coverage-report
+      - run: npx jest --ci --json --coverage --testLocationInResults --outputFile=coverage/report.json
       - uses: ArtiomTr/jest-coverage-report-action@v2
         id: coverage
         with:
-          skip-step: install
+          skip-step: all
+          coverage-file: coverage/report.json
+          base-coverage-file: coverage/report.json # opt out of comparison
           output: report-markdown      
       - uses: marocchino/sticky-pull-request-comment@v2
         with:
