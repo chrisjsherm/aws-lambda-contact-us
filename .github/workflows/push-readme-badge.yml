@@ -17,7 +17,7 @@ jobs:
 
       - run: npm clean-install
 
-      - run: npx jest --ci --json --coverage --testLocationInResults --outputFile=coverage/report.json
+      - run: npm run test:ci
       - run: npm run make-badges
 
       - name: Deploy to Gist
