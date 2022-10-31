@@ -1,5 +1,7 @@
 # Lambda Docker image to handle "contact us" form
 
+![Coverage](https://raw.githubusercontent.com/gist/chrisjsherm/6f03529f7bc37ac7720e5d9680b5894d/raw/348a16a97be20dfec38249bd3e0882eaff6054cd/aws-lambda-contact-us_coverage.svg)
+
 Handle a POST of a "contact us" form and generate an email with its contents via
 AWS Simple Email Service (SES) using this Lambda Function.
 
