@@ -20,6 +20,16 @@ The handler assumes you configured a Lambda environment variable named
 The JSON payload of the POST request must match the shape of
 `src/models/contact-form-us.interface.ts`.
 
+There is a GitHub Action that generates a test coverage badge when you push to
+the `master` branch. For the Action to work, you need to:
+
+1. Create a [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
+   and give it access to GitHub Gists.
+2. In this forked repository, create an Actions secret with the name `TOKEN`
+   and set the value to your personal access token.
+3. Create a Gist, and update the `gist_id` in this repository's
+   `.github/workflows/push-readme-badge.yml` file with the Gist ID.
+
 ## CloudFormation
 
 This repository is designed to be referenced by a
