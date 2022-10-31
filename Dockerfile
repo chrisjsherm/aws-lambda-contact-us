@@ -3,7 +3,7 @@ FROM node:16-alpine AS builder
 # Install NPM dependencies for function
 COPY package*.json ./app/
 WORKDIR /app
-RUN npm clean-install
+RUN npm clean-install --ignore-scripts
 
 # Copy source files
 COPY tsconfig.json .
