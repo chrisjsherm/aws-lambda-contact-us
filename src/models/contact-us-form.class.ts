@@ -2,7 +2,7 @@ import { validateEmailAddress } from '../helpers/validate-email-address.helper';
 import { IContactUs } from './contact-us.interface';
 
 /**
- * "Contact us" form
+ * "Contact us" form.
  */
 export class ContactUsForm implements IContactUs {
   constructor(
@@ -13,7 +13,7 @@ export class ContactUsForm implements IContactUs {
   ) {}
 
   /**
-   * Validate the property values of the form
+   * Validate the property values of the form.
    *
    * @returns List of error messages for properties that failed validation
    */
@@ -32,7 +32,7 @@ export class ContactUsForm implements IContactUs {
   }
 
   /**
-   * Validate a string property
+   * Validate a string property.
    *
    * @param property Name of the property to validate
    * @param value Value to validate

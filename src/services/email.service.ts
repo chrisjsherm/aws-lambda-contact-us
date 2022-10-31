@@ -5,6 +5,9 @@ import {
 } from '@aws-sdk/client-ses';
 import { ContactUsForm } from '../models/contact-us-form.class';
 
+/**
+ * Send email messages.
+ */
 export class EmailService {
   private sesInstance: SESClient;
 
@@ -12,6 +15,14 @@ export class EmailService {
     this.sesInstance = new SESClient({});
   }
 
+  /**
+   * Send an email with a message containing details from a POSTed contact form.
+   *
+   * @param sourceEmailAddress Address from which to send the message
+   * (also sends to this address).
+   * @param contactForm Contact information collected from POSTed form
+   * @returns ID of the created message
+   */
   async sendMessage(
     sourceEmailAddress: string,
     contactForm: ContactUsForm,

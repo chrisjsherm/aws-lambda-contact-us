@@ -1,20 +1,15 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { headerContentText } from './constants/header-content-text.constant';
+import { httpErrorInternalService } from './constants/http-error-internal-service.constant';
 import { parseRequestBody } from './helpers/parse-request-body.helper';
 import { validateEmailAddress } from './helpers/validate-email-address.helper';
 import { ContactUsForm } from './models/contact-us-form.class';
 import { EmailService } from './services/email.service';
 
-const headers = {
-  'content-type': 'text/plain; charset=utf-8',
-};
-const baseErrorResponse = {
-  statusCode: 500,
-  headers,
-};
-
+// Dependency injection for the Lambda function
 export const dependencies = {
   /**
-   * Initialize dependencies to give us a hook for mocking in tests
+   * Initialize dependencies to give us a hook for mocking in tests.
    *
    * @returns Dependencies object
    */
@@ -28,7 +23,7 @@ export const dependencies = {
 };
 
 /**
- * Lambda Function handler for "contact us" form
+ * Lambda Function handler for "contact us" form.
  *
  * @param event API Gateway/Lambda Function URL event
  * @returns Result of SES request
@@ -36,12 +31,13 @@ export const dependencies = {
 export const handler = async function handleRequest(
   event: APIGatewayEvent,
 ): Promise<APIGatewayProxyResult> {
+  // Validate email address we're sending to
   const emailAddress = process.env['ValidatedEmailAddress'];
   if (emailAddress === undefined) {
     const message = 'ValidatedEmailAddress parameter is not set.';
     console.error(message);
     return {
-      ...baseErrorResponse,
+      ...httpErrorInternalService,
       body: message,
     };
   } else if (validateEmailAddress(emailAddress) === false) {
@@ -49,11 +45,12 @@ export const handler = async function handleRequest(
       'ValidatedEmailAddress parameter is not a valid email address.';
     console.error(message);
     return {
-      ...baseErrorResponse,
+      ...httpErrorInternalService,
       body: message,
     };
   }
 
+  // Parse contact form
   let contactForm: ContactUsForm;
   try {
     contactForm = parseRequestBody(event.body);
@@ -75,20 +72,20 @@ export const handler = async function handleRequest(
     console.info(result);
     return {
       statusCode: 201,
-      headers,
+      headers: headerContentText,
       body: result,
     };
   } catch (err: unknown) {
     if (!(err instanceof Error)) {
       return {
-        ...baseErrorResponse,
+        ...httpErrorInternalService,
         body: err as string,
       };
     }
 
     console.error(`Error occurred: ${err.message}`);
     return {
-      ...baseErrorResponse,
+      ...httpErrorInternalService,
       body: err.message,
     };
   }
