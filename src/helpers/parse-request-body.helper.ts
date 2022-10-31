@@ -1,4 +1,5 @@
 import { APIGatewayProxyResult } from 'aws-lambda';
+import { headerContentText } from '../constants/header-content-text.constant';
 import { ContactUsForm } from '../models/contact-us-form.class';
 import { IContactUs } from '../models/contact-us.interface';
 
@@ -14,9 +15,7 @@ export function parseRequestBody(body: string | null): ContactUsForm {
 
   const badRequest = {
     statusCode: 400,
-    headers: {
-      'content-type': 'text/plain; charset=utf-8',
-    },
+    headers: headerContentText,
   };
 
   if (body === undefined || body === null) {
