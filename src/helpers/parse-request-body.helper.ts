@@ -1,11 +1,13 @@
+import { APIGatewayProxyResult } from 'aws-lambda';
 import { ContactUsForm } from '../models/contact-us-form.class';
 import { IContactUs } from '../models/contact-us.interface';
 
 /**
- * Parse request body of the "contact us" form, ensuring it is well-formed
+ * Parse request body of the "contact us" form, ensuring it is well-formed.
  *
- * @param body Request body
+ * @param body HTTP request body
  * @returns Parsed request body
+ * @throws Error containing a stringified APIGatewayProxyResult
  */
 export function parseRequestBody(body: string | null): ContactUsForm {
   console.info('Validating request body.');
@@ -38,12 +40,12 @@ export function parseRequestBody(body: string | null): ContactUsForm {
   } catch (err) {
     console.error(err);
     console.info(body);
-    throw new Error(
-      JSON.stringify({
-        ...badRequest,
-        body: 'Request body is malformed. Error parsing JSON.',
-      }),
-    );
+
+    const response: APIGatewayProxyResult = {
+      ...badRequest,
+      body: 'Request body is malformed. Error parsing JSON.',
+    };
+    throw new Error(JSON.stringify(response));
   }
 
   const errors: string[] = contactUsForm.validateProperties();

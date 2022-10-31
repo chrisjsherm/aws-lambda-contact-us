@@ -1,18 +1,71 @@
 {
   "root": true,
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint"],
+  "plugins": ["jsdoc", "@typescript-eslint"],
   "extends": [
+    // Use ESLint's inbuilt "recommended" config - it turns on a small,
+    // sensible set of rules which lint for well-known best-practices.
     "eslint:recommended",
+
+    // Disable a few of the eslint:recommended rules the TypeScript compiler
+    // already checks for.
     "plugin:@typescript-eslint/eslint-recommended",
+
+    // Use the typescript-eslint NPM project's recommended rule set.
     "plugin:@typescript-eslint/recommended",
+
+    // Turn off rules that conflict with Prettier
     "prettier"
   ],
   "rules": {
+    // Allow prepending unused variables with underscore
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": [
       "error",
       { "argsIgnorePattern": "^_" }
-    ]
+    ],
+
+    // Disable JSDoc types because it's redundant for TypeScript code.
+    "jsdoc/require-param-type": 0,
+    "jsdoc/require-returns-type": 0,
+
+    // JSDoc rules
+    "jsdoc/check-access": 1, // Recommended
+    "jsdoc/check-alignment": 1, // Recommended
+    "jsdoc/check-indentation": 1,
+    "jsdoc/check-line-alignment": 1,
+    "jsdoc/check-param-names": 1, // Recommended
+    "jsdoc/check-property-names": 1, // Recommended
+    "jsdoc/check-syntax": 1,
+    "jsdoc/check-tag-names": 1, // Recommended
+    "jsdoc/check-types": 1, // Recommended
+    "jsdoc/check-values": 1, // Recommended
+    "jsdoc/empty-tags": 1, // Recommended
+    "jsdoc/implements-on-classes": 1, // Recommended
+    "jsdoc/multiline-blocks": 1, // Recommended
+    "jsdoc/newline-after-description": 1, // Recommended
+    "jsdoc/no-bad-blocks": 1,
+    "jsdoc/no-defaults": 1,
+    "jsdoc/no-multi-asterisks": 1, // Recommended
+    "jsdoc/no-types": 1,
+    "jsdoc/no-undefined-types": 1, // Recommended
+    "jsdoc/require-asterisk-prefix": 1,
+    "jsdoc/require-description": 1,
+    "jsdoc/require-jsdoc": 1, // Recommended
+    "jsdoc/require-param": 1, // Recommended
+    "jsdoc/require-param-description": 1, // Recommended
+    "jsdoc/require-param-name": 1, // Recommended
+    "jsdoc/require-property": 1, // Recommended
+    "jsdoc/require-property-description": 1, // Recommended
+    "jsdoc/require-property-name": 1, // Recommended
+    "jsdoc/require-property-type": 1, // Recommended
+    "jsdoc/require-returns": 1, // Recommended
+    "jsdoc/require-returns-check": 1, // Recommended
+    "jsdoc/require-returns-description": 1, // Recommended
+    "jsdoc/require-throws": 1,
+    "jsdoc/require-yields": 1, // Recommended
+    "jsdoc/require-yields-check": 1, // Recommended
+    "jsdoc/tag-lines": 1, // Recommended
+    "jsdoc/valid-types": 1 // Recommended
   }
 }

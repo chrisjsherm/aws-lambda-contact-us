@@ -1,0 +1,23 @@
+name: 'continuous-integration'
+on:
+  pull_request:
+    branches:
+      - master
+jobs:
+  enforce-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+          cache: 'npm'
+
+      - run: npm clean-install
+
+      - run: npx eslint 'src/**/*.{js,ts}' --cache
+      - run: npx prettier --check 'src/**/*.{js,ts}'
+
+      - run: npx jest --ci --json --coverage --testLocationInResults --outputFile=coverage/report.json
