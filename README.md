@@ -1,7 +1,5 @@
 # Lambda Docker image to handle "contact us" form
 
-![Coverage](https://raw.githubusercontent.com/gist/chrisjsherm/6f03529f7bc37ac7720e5d9680b5894d/raw/348a16a97be20dfec38249bd3e0882eaff6054cd/aws-lambda-contact-us_coverage.svg)
-
 Handle a POST of a "contact us" form and generate an email with its contents via
 AWS Simple Email Service (SES) using this Lambda Function.
 
@@ -19,16 +17,6 @@ The handler assumes you configured a Lambda environment variable named
 
 The JSON payload of the POST request must match the shape of
 `src/models/contact-form-us.interface.ts`.
-
-There is a GitHub Action that generates a test coverage badge when you push to
-the `master` branch. For the Action to work, you need to:
-
-1. Create a [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
-   and give it access to GitHub Gists.
-2. In this forked repository, create an Actions secret with the name `TOKEN`
-   and set the value to your personal access token.
-3. Create a Gist, and update the `gist_id` in this repository's
-   `.github/workflows/push-readme-badge.yml` file with the Gist ID.
 
 ## CloudFormation
 
