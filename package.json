@@ -11,8 +11,8 @@
     "build": "tsc --build --verbose",
     "lint": "eslint 'src/**/*.{js,ts}' --fix --cache && npx prettier --write .",
     "make-badges": "coverage-badger --reportFile coverage/clover.xml --destinationDir coverage/ --badgeFileName aws-lambda-contact-us_coverage",
-    "test": "jest --watch",
-    "test:ci": "npx jest --ci --json --coverage --testLocationInResults --outputFile=coverage/report.json",
+    "test": "jest --watch --runInBand",
+    "test:ci": "npx jest --ci --json --coverage --testLocationInResults --outputFile=coverage/report.json --runInBand",
     "prepare": "husky install"
   },
   "author": "Sherman Digital, LLC",
