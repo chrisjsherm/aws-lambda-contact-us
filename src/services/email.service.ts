@@ -3,53 +3,49 @@ import {
   SendEmailCommandInput,
   SESClient,
 } from '@aws-sdk/client-ses';
-import { ContactUsForm } from '../models/contact-us-form.class';
+import { EmailAddress } from '../models/email-address.class';
+import { IEmail } from '../models/email.interface';
 
 /**
  * Send email messages.
  */
 export class EmailService {
-  private sesInstance: SESClient;
-
-  constructor() {
-    this.sesInstance = new SESClient({});
-  }
+  constructor(private sesClient: SESClient) {}
 
   /**
-   * Send an email with a message containing details from a POSTed contact form.
+   * Send an email
    *
-   * @param sourceEmailAddress Address from which to send the message
-   * (also sends to this address).
-   * @param contactForm Contact information collected from POSTed form
+   * @param email Email data
    * @returns ID of the created message
    */
-  async sendMessage(
-    sourceEmailAddress: string,
-    contactForm: ContactUsForm,
-  ): Promise<string | undefined> {
+  async sendMessage(email: IEmail): Promise<string | undefined> {
     const emailParams: SendEmailCommandInput = {
-      Source: sourceEmailAddress,
-      ReplyToAddresses: [contactForm.fromEmailAddress],
+      Source: email.sourceEmailAddress.toString(),
+      ReplyToAddresses: email.replyToEmailAddresses.map(
+        (address: EmailAddress): string => address.toString(),
+      ),
       Destination: {
-        ToAddresses: [sourceEmailAddress],
+        ToAddresses: email.toEmailAddresses.map(
+          (address: EmailAddress): string => address.toString(),
+        ),
       },
       Message: {
         Body: {
           Text: {
             Charset: 'UTF-8',
-            Data: contactForm.message,
+            Data: email.message,
           },
         },
         Subject: {
           Charset: 'UTF-8',
-          Data: contactForm.subject,
+          Data: email.subject,
         },
       },
     };
 
     const sendEmailCommand = new SendEmailCommand(emailParams);
 
-    const { MessageId } = await this.sesInstance.send(sendEmailCommand);
+    const { MessageId } = await this.sesClient.send(sendEmailCommand);
     return MessageId;
   }
 }

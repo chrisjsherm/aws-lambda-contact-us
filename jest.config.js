@@ -18,7 +18,7 @@ module.exports = {
   // clearMocks: false,
 
   // Indicates whether the coverage information should be collected while executing the test
-  collectCoverage: true,
+  // collectCoverage: true,
 
   // An array of glob pattern s indicating a set of files for which coverage information should be collected
   collectCoverageFrom: ['**/*{.js,ts}'],
@@ -32,15 +32,20 @@ module.exports = {
   // ],
 
   // A list of reporter names that Jest uses when writing coverage reports
-  coverageReporters: ['json', 'text', 'lcov', 'clover'],
+  coverageReporters: [
+    //'json',
+    'text',
+    'lcov',
+    //'clover'
+  ],
 
   // An object that configures minimum threshold enforcement for coverage results
   coverageThreshold: {
     global: {
-      branches: 100,
-      functions: 100,
-      lines: 100,
-      statements: 100,
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
     },
   },
 
@@ -126,7 +131,7 @@ module.exports = {
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
   // Add support for String.prototype.matchAll
-  setupFiles: [],
+  // setupFiles: [],
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
   // setupFilesAfterEnv: [],
