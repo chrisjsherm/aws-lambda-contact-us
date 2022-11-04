@@ -1,7 +1,7 @@
 import { SendEmailCommand, SESClient } from '@aws-sdk/client-ses';
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
-import { ContactUsForm } from '../models/contact-us-form.class';
+import { EmailAddress } from '../models/email-address.class';
 import { EmailService } from './email.service';
 
 describe('Email service', (): void => {
@@ -10,7 +10,7 @@ describe('Email service', (): void => {
 
   beforeEach((): void => {
     sesMock.reset();
-    service = new EmailService();
+    service = new EmailService(sesMock as unknown as SESClient);
   });
 
   it('should create', (): void => {
@@ -18,29 +18,27 @@ describe('Email service', (): void => {
     expect(service).toBeDefined();
   });
 
-  it('should send the message to SES', async (): Promise<void> => {
+  it('should send the message to the email client', async (): Promise<void> => {
     // Arrange
     sesMock.on(SendEmailCommand).resolves({
       MessageId: '123',
     });
 
     // Act
-    const result = await service.sendMessage(
-      'email@example.com',
-      new ContactUsForm(
-        'Dan',
-        'danno@gmail.com',
-        'Hello, World',
-        'Good morning',
-      ),
-    );
+    const result = await service.sendMessage({
+      replyToEmailAddresses: [new EmailAddress('danno@gmail.com')],
+      subject: 'Hello, World',
+      message: 'Good morning',
+      sourceEmailAddress: new EmailAddress('contactus@example.com'),
+      toEmailAddresses: [new EmailAddress('contactus@example.com')],
+    });
 
     // Assert
     expect(result).toEqual('123');
     expect(sesMock).toHaveReceivedCommandTimes(SendEmailCommand, 1);
   });
 
-  it('should handle an error sending the message to SES', async (): Promise<void> => {
+  it('should handle an error sending the message to the email client', async (): Promise<void> => {
     // Arrange
     sesMock.on(SendEmailCommand).rejects({
       Type: 'MessageRejected',
@@ -48,15 +46,13 @@ describe('Email service', (): void => {
 
     // Assert
     expect(() =>
-      service.sendMessage(
-        'email@example.com',
-        new ContactUsForm(
-          'Dan',
-          'danno@gmail.com',
-          'Hello, World',
-          'Good morning',
-        ),
-      ),
+      service.sendMessage({
+        replyToEmailAddresses: [new EmailAddress('danno@gmail.com')],
+        subject: 'Hello, World',
+        message: 'Good morning',
+        sourceEmailAddress: new EmailAddress('contactus@example.com'),
+        toEmailAddresses: [new EmailAddress('contactus@example.com')],
+      }),
     ).rejects.toThrow();
     expect(sesMock).toHaveReceivedCommandTimes(SendEmailCommand, 1);
   });
