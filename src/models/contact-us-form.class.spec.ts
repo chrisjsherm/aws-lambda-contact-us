@@ -1,4 +1,5 @@
 import { ContactUsForm } from './contact-us-form.class';
+import { IContactUsRequestBody } from './contact-us-request-body.interface';
 import { ErrorArray } from './error-array.class';
 
 describe('Contact us form', (): void => {
@@ -98,6 +99,31 @@ describe('Contact us form', (): void => {
     expect(
       (): ContactUsForm => new ContactUsForm(body, 'cf-turnstile'),
     ).toThrow(new ErrorArray([], 'The form contains invalid values.'));
+  });
+
+  it('should use 128 as the default max length', (): void => {
+    // Arrange
+    const form = new ContactUsForm(
+      '{"fromName": "Dan", "fromEmailAddress": "danno@gmail.com", ' +
+        '"subject": "Status update", "message": "Hello, World", ' +
+        `"cf-turnstile": "red-fox"}`,
+      'cf-turnstile',
+    );
+    const captchaTokenValue =
+      'kvACBrxOFYqErnWVN9zqkaIC9yAty77QhopJGA3isYkJKfkdThc4iMLiqtN5MMKdtrOGMldcXwS45Htvt6IHkq9PGbGURblGIIInnL0ykoycIqJJXHDGHgvXsJ9xWtNXw';
+    form['maxLengthByPropertyName'].delete('captchaToken');
+    form['captchaToken'] = captchaTokenValue;
+
+    // Act
+    const result = form['validateFormValues']({
+      captchaToken: captchaTokenValue,
+    } as IContactUsRequestBody);
+
+    // Assert
+    expect(captchaTokenValue.length).toBe(129);
+    expect(result).toEqual([
+      'Property "captchaToken" must be less than 129 characters.',
+    ]);
   });
 
   it('should mark mal-formed email addresses as invalid', (): void => {
