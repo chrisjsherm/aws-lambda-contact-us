@@ -21,15 +21,20 @@ The JSON payload of the POST request must match the shape of
 ## CloudFormation
 
 This repository is designed to be referenced by a
-[contact form handler CloudFormation template](https://github.com/chrisjsherm/aws-cf-contact-form-handler). To use with the template, fork this repository and
+[contact form handler CloudFormation template](https://github.com/chrisjsherm/aws-cf-contact-form-handler).
+To use with the template, fork this repository and
 use the HTTPS clone link to set the `GitHubSourceHTTPS` parameter in the
 CloudFormation template.
 
 ## Build
 
+The `.github/workflows/pr-continuous-integration.yml` file contains configuration
+to enforce code quality when creating a pull request on GitHub.
+
 The `buildspec.yml` file contains configuration for AWS CodeBuild. It builds a
 Docker image based on AWS' Lambda image and then deploys to an ECR repository
-named `aws-lambda-contact-us`.
+named `aws-lambda-contact-us` when a pull request is merged to the `master`
+branch.
 
 The `buildspec.yml` file has several environment variables it assumes are set
 by CloudFormation. If you do not use the CloudFormation template referenced
