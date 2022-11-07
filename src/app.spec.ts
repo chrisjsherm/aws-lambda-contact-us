@@ -272,7 +272,6 @@ describe('init dependencies', (): void => {
   it('should throw when captcha is enabled but the secret key path is missing', async (): Promise<void> => {
     // Arrange
     process.env['CaptchaEnabled'] = 'true';
-    delete process.env['CaptchaSecretKeyParameterPath'];
 
     // Assert
     expect(async () => {
