@@ -1,7 +1,7 @@
 import { SESClient } from '@aws-sdk/client-ses';
 import { SSMClient } from '@aws-sdk/client-ssm';
 import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { take } from 'rxjs';
+import { lastValueFrom, take } from 'rxjs';
 import { validateStringProperty } from './helpers/validate-string-property.helper';
 import { ContactUsForm } from './models/contact-us-form.class';
 import { EmailAddress } from './models/email-address.class';
@@ -16,9 +16,10 @@ export const dependencies = {
   /**
    * Initialize dependencies to give us a hook for mocking in tests.
    *
+   * @param ssmClient AWS Systems Manager client
    * @returns Dependencies object
    */
-  init: async (): Promise<LambdaFnDependencies> => {
+  init: async (ssmClient?: SSMClient): Promise<LambdaFnDependencies> => {
     const sesClient = new SESClient({});
 
     const dependencies: LambdaFnDependencies = {
@@ -36,8 +37,14 @@ export const dependencies = {
         );
       }
 
+      if (!ssmClient) {
+        throw new Error(
+          'SSM Client parameter must be set to initialize the CaptchaService.',
+        );
+      }
+
       dependencies.captchaService = new CaptchaService(
-        new ParameterService(new SSMClient({})),
+        new ParameterService(ssmClient),
         captchaSecretKeyParameterPath,
       );
     }
@@ -121,45 +128,30 @@ export const handler = async function handleRequest(
     };
   }
 
-  let captchaService: CaptchaService | undefined, emailService: EmailService;
-  try {
-    const injectedDependencies = await dependencies.init();
-    captchaService = injectedDependencies.captchaService;
-    emailService = injectedDependencies.emailService;
+  const injectedDependencies = await dependencies.init();
+  const captchaService = injectedDependencies.captchaService;
+  const emailService = injectedDependencies.emailService;
 
-    if (captchaService) {
-      captchaService
-        .validateToken(
-          contactForm.captchaToken as string,
-          event.requestContext?.identity?.sourceIp,
-        )
-        .pipe(take(1))
-        .subscribe();
+  if (captchaService) {
+    const validateToken$ = captchaService
+      .validateToken(
+        contactForm.captchaToken as string,
+        event.requestContext?.identity?.sourceIp,
+      )
+      .pipe(take(1));
+
+    const isValid = await lastValueFrom(validateToken$);
+    if (isValid === false) {
+      return {
+        statusCode: 401,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          errors: ['Captcha validation did not succeed.'],
+        }),
+      };
     }
-  } catch (err) {
-    const defaultMessage = 'An error occurred validating captcha.';
-    const badRequest = {
-      statusCode: 400,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        errors: [defaultMessage],
-      }),
-    };
-
-    if (!(err instanceof Error)) {
-      console.error(defaultMessage);
-      return badRequest;
-    }
-
-    console.error(err.message);
-    return {
-      ...badRequest,
-      body: JSON.stringify({
-        errors: [err.message],
-      }),
-    };
   }
 
   // Compose email subject

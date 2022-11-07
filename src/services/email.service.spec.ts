@@ -45,14 +45,15 @@ describe('Email service', (): void => {
     });
 
     // Assert
-    expect(() =>
-      service.sendMessage({
-        replyToEmailAddresses: [new EmailAddress('danno@gmail.com')],
-        subject: 'Hello, World',
-        message: 'Good morning',
-        sourceEmailAddress: new EmailAddress('contactus@example.com'),
-        toEmailAddresses: [new EmailAddress('contactus@example.com')],
-      }),
+    expect(
+      async () =>
+        await service.sendMessage({
+          replyToEmailAddresses: [new EmailAddress('danno@gmail.com')],
+          subject: 'Hello, World',
+          message: 'Good morning',
+          sourceEmailAddress: new EmailAddress('contactus@example.com'),
+          toEmailAddresses: [new EmailAddress('contactus@example.com')],
+        }),
     ).rejects.toThrow();
     expect(sesMock).toHaveReceivedCommandTimes(SendEmailCommand, 1);
   });

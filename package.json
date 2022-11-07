@@ -11,7 +11,7 @@
     "build": "tsc --build --verbose",
     "lint": "eslint 'src/**/*.{js,ts}' --fix --cache && npx prettier --write .",
     "test": "jest --watch --runInBand",
-    "test:ci": "jest --ci --runInBand",
+    "test:ci": "jest --ci --coverage --runInBand",
     "prepare": "husky install"
   },
   "author": "Sherman Digital, LLC",
