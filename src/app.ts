@@ -92,8 +92,12 @@ export const handler = async function handleRequest(
 
   // Parse contact form
   let contactForm: ContactUsForm;
+  let captchaFieldName;
+  if (process.env['CaptchaEnabled'] === 'true') {
+    captchaFieldName = process.env['CaptchaFieldName'] as string;
+  }
   try {
-    contactForm = new ContactUsForm(event.body);
+    contactForm = new ContactUsForm(event.body, captchaFieldName);
   } catch (err: unknown) {
     const defaultMessage = 'Contact form is invalid (unknown problem parsing).';
     const badRequest = {

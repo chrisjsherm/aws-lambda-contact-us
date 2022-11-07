@@ -43,6 +43,9 @@ describe('Lambda handler', (): void => {
         emailService: mockEmailService,
       });
 
+    process.env['CaptchaEnabled'] = 'true';
+    process.env['CaptchaFieldName'] = 'cfTurnstileResponse';
+    process.env['CaptchaSecretKeyParameterPath'] = '/path/to/key';
     process.env['ValidatedEmailAddress'] = 'admin@example.com';
 
     jest.spyOn(FormModule, 'ContactUsForm').mockImplementation(() => {
@@ -248,6 +251,12 @@ describe('Lambda handler', (): void => {
 });
 
 describe('init dependencies', (): void => {
+  beforeAll((): void => {
+    delete process.env['CaptchaEnabled'];
+    delete process.env['CaptchaFieldName'];
+    delete process.env['CaptchaSecretKeyParameterPath'];
+  });
+
   beforeEach((): void => {
     dependencies.init = originalInitFn;
   });
