@@ -1,6 +1,7 @@
 build-cache
 coverage
 dist
+.eslintcache
 node_modules
 
 shell-scripts/push-to-ecr.sh
