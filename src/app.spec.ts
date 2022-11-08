@@ -59,6 +59,23 @@ describe('Lambda handler', (): void => {
     });
   });
 
+  it('should return 500 when DependencyInjector throws', async (): Promise<void> => {
+    // Arrange
+    jest
+      .spyOn(DependencyInjectorModule, 'DependencyInjector')
+      .mockImplementation(() => {
+        throw new Error('Bad permissions');
+      });
+
+    // Act
+    const result = await handler({
+      body: '',
+    } as APIGatewayEvent);
+
+    // Assert
+    expect(result.statusCode).toBe(500);
+  });
+
   it('should return 400 when ContactUsForm throws an ErrorArray', async (): Promise<void> => {
     // Arrange
     jest.spyOn(FormModule, 'ContactUsForm').mockImplementation(() => {
