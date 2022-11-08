@@ -85,9 +85,23 @@ export const handler = async function handleRequest(
     };
   }
 
-  const injectedDependencies = new DependencyInjector();
-  const captchaService = injectedDependencies.captchaService;
-  const emailService = injectedDependencies.emailService;
+  let captchaService, emailService;
+  try {
+    const injectedDependencies = new DependencyInjector();
+    captchaService = injectedDependencies.captchaService;
+    emailService = injectedDependencies.emailService;
+  } catch (err: unknown) {
+    console.error(err);
+    return {
+      statusCode: 500,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        errors: ['An error occurred initializing dependencies.'],
+      }),
+    };
+  }
 
   if (captchaService) {
     const validateToken$ = captchaService
