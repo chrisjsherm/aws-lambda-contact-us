@@ -1,18 +1,16 @@
-import { GetParameterCommandOutput, SSMClient } from '@aws-sdk/client-ssm';
 import {
   APIGatewayEvent,
   APIGatewayEventDefaultAuthorizerContext,
   APIGatewayEventRequestContextWithAuthorizer,
 } from 'aws-lambda';
 import { Observable, of } from 'rxjs';
-import { dependencies, handler } from './app';
+import { handler } from './app';
 import * as FormModule from './models/contact-us-form.class';
 import { IEmail } from './models/email.interface';
 import { ErrorArray } from './models/error-array.class';
 import { CaptchaService } from './services/captcha.service';
+import * as DependencyInjectorModule from './services/dependency-injector.service';
 import { EmailService } from './services/email.service';
-
-const originalInitFn = dependencies.init;
 
 describe('Lambda handler', (): void => {
   let mockCaptchaService: CaptchaService;
@@ -37,17 +35,19 @@ describe('Lambda handler', (): void => {
       },
     } as EmailService;
 
-    dependencies.init = () =>
-      Promise.resolve({
-        captchaService: mockCaptchaService,
-        emailService: mockEmailService,
-      });
-
     process.env['CaptchaEnabled'] = 'true';
     process.env['CaptchaFieldName'] = 'cfTurnstileResponse';
     process.env['CaptchaSecretKeyParameterPath'] = '/path/to/key';
     process.env['ValidatedEmailAddress'] = 'admin@example.com';
 
+    jest
+      .spyOn(DependencyInjectorModule, 'DependencyInjector')
+      .mockImplementation(() => {
+        return {
+          captchaService: mockCaptchaService,
+          emailService: mockEmailService,
+        };
+      });
     jest.spyOn(FormModule, 'ContactUsForm').mockImplementation(() => {
       return {
         captchaToken: undefined,
@@ -247,79 +247,5 @@ describe('Lambda handler', (): void => {
     // Assert
     expect(result.statusCode).toBe(500);
     expect(result.body).toBe('You do not have permission.');
-  });
-});
-
-describe('init dependencies', (): void => {
-  beforeAll((): void => {
-    delete process.env['CaptchaEnabled'];
-    delete process.env['CaptchaFieldName'];
-    delete process.env['CaptchaSecretKeyParameterPath'];
-  });
-
-  beforeEach((): void => {
-    dependencies.init = originalInitFn;
-  });
-
-  it('should return an instance of EmailService', async (): Promise<void> => {
-    // Act
-    const result = await dependencies.init();
-
-    // Assert
-    expect(result.emailService.constructor.name).toBe(EmailService.name);
-  });
-
-  it('should throw when captcha is enabled but the secret key path is missing', async (): Promise<void> => {
-    // Arrange
-    process.env['CaptchaEnabled'] = 'true';
-
-    // Assert
-    expect(async () => {
-      return await dependencies.init();
-    }).rejects.toThrow(
-      '"CaptchaSecretKeyParameterPath" environment variable is not set',
-    );
-
-    // Cleanup
-    delete process.env['CaptchaEnabled'];
-  });
-
-  it('should throw when captcha is enabled but SSM Client param is not set', async (): Promise<void> => {
-    // Arrange
-    process.env['CaptchaEnabled'] = 'true';
-    process.env['CaptchaSecretKeyParameterPath'] = '/path/to/param';
-
-    // Assert
-    expect(async () => {
-      return await dependencies.init();
-    }).rejects.toThrow('SSM Client parameter must be set');
-
-    // Cleanup
-    delete process.env['CaptchaEnabled'];
-    delete process.env['CaptchaSecretKeyParameterPath'];
-  });
-
-  it('should return an instance of EmailService and CaptchaService', async (): Promise<void> => {
-    // Arrange
-    process.env['CaptchaEnabled'] = 'true';
-    process.env['CaptchaSecretKeyParameterPath'] = '/path/to/param';
-    const mockSSMClient = {
-      async send(_command): Promise<GetParameterCommandOutput> {
-        return Promise.resolve({
-          Parameter: { Value: 'val' },
-        } as GetParameterCommandOutput);
-      },
-    } as SSMClient;
-
-    // Act
-    const result = await dependencies.init(mockSSMClient);
-
-    // Assert
-    expect(result.emailService.constructor.name).toBe(EmailService.name);
-    expect(result.captchaService?.constructor.name).toBe(CaptchaService.name);
-
-    // Cleanup
-    delete process.env['CaptchaEnabled'];
-    delete process.env['CaptchaSecretKeyParameterPath'];
   });
 });
