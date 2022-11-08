@@ -18,9 +18,18 @@ export class DependencyInjector {
       const captchaSecretKeyParameterPath =
         process.env['CaptchaSecretKeyParameterPath'];
 
+      if (
+        captchaSecretKeyParameterPath === undefined ||
+        captchaSecretKeyParameterPath === ''
+      ) {
+        throw new Error(
+          'Environment variable "CaptchaSecretKeyParameterPath" is not set.',
+        );
+      }
+
       this.captchaService = new CaptchaService(
         new ParameterService(new SSMClient({})),
-        captchaSecretKeyParameterPath ?? '',
+        captchaSecretKeyParameterPath,
       );
     }
   }

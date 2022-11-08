@@ -28,15 +28,12 @@ describe('Dependency injector', (): void => {
     expect(new DependencyInjector()).toBeDefined();
   });
 
-  it('should initialize the captcha service', (): void => {
+  it('should throw when captcha is enabled but the path to the secret is not set', (): void => {
     // Arrange
     process.env['CaptchaEnabled'] = 'true';
 
-    // Act
-    const service = new DependencyInjector();
-
     // Assert
-    expect(service.captchaService).toBeDefined();
+    expect(() => new DependencyInjector()).toThrow();
 
     // Clean up
     delete process.env['CaptchaEnabled'];
