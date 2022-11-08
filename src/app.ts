@@ -1,57 +1,10 @@
-import { SESClient } from '@aws-sdk/client-ses';
-import { SSMClient } from '@aws-sdk/client-ssm';
 import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { lastValueFrom, take } from 'rxjs';
 import { validateStringProperty } from './helpers/validate-string-property.helper';
 import { ContactUsForm } from './models/contact-us-form.class';
 import { EmailAddress } from './models/email-address.class';
 import { ErrorArray } from './models/error-array.class';
-import { LambdaFnDependencies } from './models/lambda-fn-dependencies.interface';
-import { CaptchaService } from './services/captcha.service';
-import { EmailService } from './services/email.service';
-import { ParameterService } from './services/parameter.service';
-
-// Dependency injection for the Lambda function
-export const dependencies = {
-  /**
-   * Initialize dependencies to give us a hook for mocking in tests.
-   *
-   * @param ssmClient AWS Systems Manager client
-   * @returns Dependencies object
-   */
-  init: async (ssmClient?: SSMClient): Promise<LambdaFnDependencies> => {
-    const sesClient = new SESClient({});
-
-    const dependencies: LambdaFnDependencies = {
-      emailService: new EmailService(sesClient),
-    };
-
-    if (process.env['CaptchaEnabled'] === 'true') {
-      const captchaSecretKeyParameterPath =
-        process.env['CaptchaSecretKeyParameterPath'];
-
-      if (captchaSecretKeyParameterPath === undefined) {
-        throw new Error(
-          'Captcha is enabled but "CaptchaSecretKeyParameterPath" ' +
-            'environment variable is not set.',
-        );
-      }
-
-      if (!ssmClient) {
-        throw new Error(
-          'SSM Client parameter must be set to initialize the CaptchaService.',
-        );
-      }
-
-      dependencies.captchaService = new CaptchaService(
-        new ParameterService(ssmClient),
-        captchaSecretKeyParameterPath,
-      );
-    }
-
-    return Promise.resolve(dependencies);
-  },
-};
+import { DependencyInjector } from './services/dependency-injector.service';
 
 /**
  * Lambda Function handler for "contact us" form.
@@ -97,7 +50,6 @@ export const handler = async function handleRequest(
     captchaFieldName = process.env['CaptchaFieldName'] as string;
   }
   try {
-    console.log(event.body);
     contactForm = new ContactUsForm(event.body, captchaFieldName);
   } catch (err: unknown) {
     const defaultMessage = 'Contact form is invalid (unknown problem parsing).';
@@ -133,7 +85,7 @@ export const handler = async function handleRequest(
     };
   }
 
-  const injectedDependencies = await dependencies.init();
+  const injectedDependencies = new DependencyInjector();
   const captchaService = injectedDependencies.captchaService;
   const emailService = injectedDependencies.emailService;
 
