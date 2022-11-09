@@ -45,7 +45,7 @@ describe('Parameter service', (): void => {
     result$.subscribe({
       error: (err) => {
         expect(err.message).toBe(
-          'Parameter /missing/param could not be found.',
+          'Parameter "/missing/param" does not have a value.',
         );
       },
     });

@@ -33,7 +33,9 @@ export class ParameterService {
     return from(this.ssmClient.send(command)).pipe(
       map((result: GetParameterCommandOutput): string => {
         if (result.Parameter?.Value === undefined) {
-          throw new Error(`Parameter ${parameterName} could not be found.`);
+          throw new Error(
+            `Parameter "${parameterName}" does not have a value.`,
+          );
         }
 
         return result.Parameter.Value;
