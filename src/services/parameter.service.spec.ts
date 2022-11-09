@@ -1,20 +1,21 @@
 import {
-  GetParameterCommand,
-  GetParameterCommandOutput,
+  GetParametersCommand,
+  GetParametersCommandOutput,
   SSMClient,
 } from '@aws-sdk/client-ssm';
 import { ParameterService } from './parameter.service';
 describe('Parameter service', (): void => {
   let service: ParameterService;
   const mockSSMClient = {
-    send(command: GetParameterCommand): Promise<GetParameterCommandOutput> {
-      if (command.input.Name === '/missing/param') {
-        return Promise.resolve({} as GetParameterCommandOutput);
+    send(command: GetParametersCommand): Promise<GetParametersCommandOutput> {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      if (command.input.Names![0] === '/missing/param') {
+        return Promise.resolve({} as GetParametersCommandOutput);
       }
 
       return Promise.resolve({
-        Parameter: { Value: 'param-value' },
-      } as GetParameterCommandOutput);
+        Parameters: [{ Value: 'param-value' }],
+      } as GetParametersCommandOutput);
     },
   } as SSMClient;
 
