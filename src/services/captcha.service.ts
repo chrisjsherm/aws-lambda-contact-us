@@ -1,5 +1,7 @@
+import axios from 'axios';
 import {
   catchError,
+  from,
   map,
   mergeMap,
   Observable,
@@ -8,9 +10,7 @@ import {
   take,
   tap,
 } from 'rxjs';
-import { fromFetch } from 'rxjs/fetch';
 import { ParameterService } from './parameter.service';
-
 /**
  * Validate a human has initiated a request by validating the supplied token
  */
@@ -30,6 +30,7 @@ export class CaptchaService {
       .getParameterValue(secretKeyParameterPath, true)
       .pipe(
         tap((value: string): void => {
+          console.log(`Secret key: ${value.substring(0, 2)}`);
           this.secretKey.next(value);
         }),
         take(1),
@@ -57,14 +58,28 @@ export class CaptchaService {
 
         return formData;
       }),
-      mergeMap((formData: FormData): Observable<Response> => {
-        return fromFetch(this.verificationEndpoint, {
-          body: formData,
-          method: 'POST',
-        });
+      mergeMap((formData: FormData) => {
+        console.info('Calling captcha verification endpoint.');
+
+        return from(
+          axios.post<{ success: boolean }>(
+            this.verificationEndpoint,
+            formData,
+            { headers: { 'Content-Type': 'multipart/form-data' } },
+          ),
+        );
+
+        // return fromFetch(this.verificationEndpoint, {
+        //   body: formData,
+        //   method: 'POST',
+        // }).pipe(
+        //   timeout({
+        //     each: 2000,
+        //   }),
+        // );
       }),
-      map((response: Response): boolean => {
-        return response.ok;
+      map((response): boolean => {
+        return response.data.success;
       }),
       take(1),
       catchError((err) => {
