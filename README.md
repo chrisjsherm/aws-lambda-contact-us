@@ -26,6 +26,28 @@ To use with the template, fork this repository and
 use the HTTPS clone link to set the `GitHubSourceHTTPS` parameter in the
 CloudFormation template.
 
+## Development
+
+Ensure you have an `~/.aws/credentials` file, Docker running, and Node/NPM
+installed. Rename `docker-compose.example.yml` to `docker-compose.yml` and
+adjust the environment variables in `docker-compose.yml` as needed.
+
+1. Run `npm install`. This installs dependencies.
+2. Run `docker compose up -d`. This starts the Lambda Fn container.
+3. Run `npm run build:live`. This starts TypeScript transpilation in watch mode and
+   starts a Docker container. When you modify code in the `src` directory,
+   the container will briefly go down while it restarts.
+4. You can hit the Lambda endpoint with:
+
+```
+curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" \
+  -d '{"fromName": "Jane", "fromEmailAddress": "jdoe@mail.com", "subject": "Party", "message": "Party this weekend!"'
+```
+
+5. Run `docker compose down`. This stops the Lambda Fn container.
+
+To see log statements, run `docker compose logs web`.
+
 ## Build
 
 The `.github/workflows/pr-continuous-integration.yml` file contains configuration

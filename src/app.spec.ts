@@ -265,4 +265,18 @@ describe('Lambda handler', (): void => {
     expect(result.statusCode).toBe(500);
     expect(result.body).toBe('You do not have permission.');
   });
+
+  it('should handle a well-formed JSON object not wrapped in an APIGatewayEvent', async (): Promise<void> => {
+    // Act
+    const result = await handler({
+      fromName: 'Dan',
+      fromEmailAddress: 'danno@gmail.com',
+      subject: 'Invocation',
+      message: 'Hello, World',
+      'cf-turnstile': 'red-fox',
+    } as unknown as APIGatewayEvent);
+
+    // Assert
+    expect(result.body).toBe('Email sent with reference number ae1234.');
+  });
 });

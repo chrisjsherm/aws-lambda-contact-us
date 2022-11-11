@@ -1,26 +1,32 @@
+################ Dev stage #######################
+FROM amazon/aws-lambda-nodejs:18 as dev
+
+# Set the CMD to your handler (filename.handler-fn-name)
+CMD [ "app.handler" ] 
+
+################ Build stage #########################
 FROM node:18-alpine AS builder
 
 # Install NPM dependencies for function
-COPY package*.json ./app/
 WORKDIR /app
+COPY tsconfig.json package*.json ./
 RUN npm clean-install --ignore-scripts
 
 # Copy source files
-COPY tsconfig.json .
 COPY src src
 
 # Transpile TypeScript to JavaScript
 RUN npm run build
 
-# Create runtime stage
-FROM amazon/aws-lambda-nodejs:18
-
-# Copy transpiled code
-COPY --from=builder /app/dist ${LAMBDA_TASK_ROOT}
+################ Runtime stage #######################
+FROM amazon/aws-lambda-nodejs:18 as prod
 
 # Install only production dependencies
 COPY package*.json ${LAMBDA_TASK_ROOT}/
 RUN npm clean-install --ignore-scripts --omit=dev
 
-# Set the CMD to your handler (could also be done as a parameter override outside of the Dockerfile)
+# Copy transpiled code
+COPY --from=builder /app/dist ${LAMBDA_TASK_ROOT}
+
+# Set the CMD to your handler (filename.handler-fn-name)
 CMD [ "app.handler" ] 

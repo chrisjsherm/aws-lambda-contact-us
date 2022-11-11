@@ -1,4 +1,5 @@
-import axios from 'axios';
+import { ClientRequest } from 'http';
+import { request } from 'https';
 import {
   catchError,
   from,
@@ -15,16 +16,12 @@ import { ParameterService } from './parameter.service';
  * Validate a human has initiated a request by validating the supplied token
  */
 export class CaptchaService {
-  private readonly verificationEndpoint: string;
   private readonly secretKey: ReplaySubject<string>;
 
   constructor(
     parameterService: ParameterService,
     secretKeyParameterPath: string,
   ) {
-    this.verificationEndpoint =
-      'https://challenges.cloudflare.com/turnstile/v0/siteverify';
-
     this.secretKey = new ReplaySubject(1);
     parameterService
       .getParameterValue(secretKeyParameterPath, true)
@@ -47,39 +44,62 @@ export class CaptchaService {
    */
   validateToken(token: string, ip?: string): Observable<boolean> {
     return this.secretKey.pipe(
-      map((key: string): FormData => {
-        const formData = new FormData();
-        formData.append('secret', key);
-        formData.append('response', token);
+      map((key: string) => {
+        let xFormBody = `${encodeURI('secret')}=${encodeURI(key)}&${encodeURI(
+          'response',
+        )}=${encodeURI(token)}`;
 
         if (ip) {
-          formData.append('remoteip', ip);
+          xFormBody += `&${encodeURI('remoteip')}=${encodeURI(ip)}`;
         }
 
-        return formData;
+        return xFormBody;
       }),
-      mergeMap((formData: FormData) => {
-        console.info('Calling captcha verification endpoint.');
-
+      mergeMap((xFormBody: string) => {
         return from(
-          axios.post<{ success: boolean }>(
-            this.verificationEndpoint,
-            formData,
-            { headers: { 'Content-Type': 'multipart/form-data' } },
-          ),
-        );
+          new Promise<{ success: boolean }>((resolve, reject) => {
+            const req: ClientRequest = request(
+              {
+                hostname: 'challenges.cloudflare.com',
+                port: 443,
+                path: '/turnstile/v0/siteverify',
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded',
+                  'Content-Length': Buffer.byteLength(xFormBody),
+                },
+              },
+              function (res) {
+                res.setEncoding('utf8');
 
-        // return fromFetch(this.verificationEndpoint, {
-        //   body: formData,
-        //   method: 'POST',
-        // }).pipe(
-        //   timeout({
-        //     each: 2000,
-        //   }),
-        // );
+                let responseBody = '';
+
+                // Build JSON string from response chunks.
+                res.on(
+                  'data',
+                  (chunk) => (responseBody = responseBody + chunk),
+                );
+                res.on('end', function () {
+                  const parsedBody = JSON.parse(responseBody + '');
+
+                  // Resolve or reject based on status code.
+                  res.statusCode !== 200
+                    ? reject(parsedBody)
+                    : resolve(parsedBody);
+                });
+              },
+            );
+
+            req.write(xFormBody);
+            req.end();
+            req.on('error', function (err) {
+              reject(err);
+            });
+          }),
+        );
       }),
       map((response): boolean => {
-        return response.data.success;
+        return response.success;
       }),
       take(1),
       catchError((err) => {

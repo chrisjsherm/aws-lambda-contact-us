@@ -50,7 +50,10 @@ export const handler = async function handleRequest(
     captchaFieldName = process.env['CaptchaFieldName'] as string;
   }
   try {
-    contactForm = new ContactUsForm(event.body, captchaFieldName);
+    contactForm = new ContactUsForm(
+      event.body ?? JSON.stringify(event), // Local dev call not wrapped in event
+      captchaFieldName,
+    );
   } catch (err: unknown) {
     const defaultMessage = 'Contact form is invalid (unknown problem parsing).';
     const badRequest = {
@@ -143,14 +146,12 @@ export const handler = async function handleRequest(
       message: contactForm.message,
     });
 
-    const result = `Email sent with reference number ${messageId}.`;
-    console.info(result);
     return {
       statusCode: 201,
       headers: {
         'Content-Type': 'text/plain; charset: UTF-8',
       },
-      body: result,
+      body: `Email sent with reference number ${messageId}.`,
     };
   } catch (err: unknown) {
     const defaultMessage = 'An unknown error occurred.';
