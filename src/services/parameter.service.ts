@@ -1,7 +1,7 @@
 import {
-  GetParametersCommand,
-  GetParametersCommandInput,
-  GetParametersCommandOutput,
+  GetParameterCommand,
+  GetParameterCommandInput,
+  GetParameterCommandOutput,
   SSMClient,
 } from '@aws-sdk/client-ssm';
 import { from, map, Observable } from 'rxjs';
@@ -24,25 +24,21 @@ export class ParameterService {
     parameterName: string,
     withDecryption = false,
   ): Observable<string> {
-    const input: GetParametersCommandInput = {
-      Names: [parameterName],
+    const input: GetParameterCommandInput = {
+      Name: parameterName,
       WithDecryption: withDecryption,
     };
-    const command = new GetParametersCommand(input);
+    const command = new GetParameterCommand(input);
 
     return from(this.ssmClient.send(command)).pipe(
-      map((result: GetParametersCommandOutput): string => {
-        if (
-          result.Parameters === undefined ||
-          result.Parameters[0] === undefined ||
-          !result.Parameters[0].Value
-        ) {
+      map((result: GetParameterCommandOutput): string => {
+        if (result.Parameter === undefined || !result.Parameter.Value) {
           throw new Error(
             `Parameter "${parameterName}" does not have a value.`,
           );
         }
 
-        return result.Parameters[0].Value;
+        return result.Parameter.Value;
       }),
     );
   }

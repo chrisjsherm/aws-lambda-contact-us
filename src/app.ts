@@ -15,6 +15,9 @@ import { DependencyInjector } from './services/dependency-injector.service';
 export const handler = async function handleRequest(
   event: APIGatewayEvent,
 ): Promise<APIGatewayProxyResult> {
+  console.info('Entered handler.');
+  console.info(`Event: ${JSON.stringify(event)}`);
+  console.info(`Body: ${JSON.stringify(event?.body)}`);
   // Validate email address we're sending to
   const validatedEmailEnvironmentVariableName = 'ValidatedEmailAddress';
   const validationErrors = validateStringProperty(
