@@ -1,11 +1,16 @@
-import { cold } from 'jasmine-marbles';
-import { Observable, of, throwError } from 'rxjs';
-import * as rxjsFetch from 'rxjs/fetch';
+import nock from 'nock';
+import { lastValueFrom, Observable, of } from 'rxjs';
 import { CaptchaService } from './captcha.service';
 import { ParameterService } from './parameter.service';
 
 describe('Captcha service', (): void => {
   let service: CaptchaService;
+
+  beforeAll((): void => {
+    // Swallow info logs
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    jest.spyOn(console, 'info').mockImplementation(() => {});
+  });
 
   beforeEach((): void => {
     const parameterService = {
@@ -22,63 +27,69 @@ describe('Captcha service', (): void => {
     expect(service).toBeDefined();
   });
 
-  it('should successfully call the verification endpoint with an IP', (): void => {
+  it('should successfully call the verification endpoint with an IP', async (): Promise<void> => {
     // Arrange
-    jest.spyOn(rxjsFetch, 'fromFetch').mockReturnValue(
-      of({
-        ok: true,
-      } as Response),
-    );
+    nock('https://challenges.cloudflare.com')
+      .post('/turnstile/v0/siteverify')
+      .reply(200, { success: true });
 
     // Act
     const result$ = service.validateToken('my-token', '192.1.1.1');
+    // Cannot use marbles: https://rxjs.dev/guide/testing/marble-testing#rxjs-code-that-consumes-promises-cannot-be-directly-tested
+    const result = await lastValueFrom(result$);
 
     // Assert
-    expect(result$).toBeObservable(cold('(a|)', { a: true }));
+    expect(result).toBe(true);
   });
 
-  it('should successfully call the verification endpoint without an IP', (): void => {
+  it('should successfully call the verification endpoint without an IP', async (): Promise<void> => {
     // Arrange
-    jest.spyOn(rxjsFetch, 'fromFetch').mockReturnValue(
-      of({
-        ok: true,
-      } as Response),
-    );
+    nock('https://challenges.cloudflare.com')
+      .post('/turnstile/v0/siteverify')
+      .reply(200, { success: true });
 
     // Act
     const result$ = service.validateToken('my-token');
+    // Cannot use marbles: https://rxjs.dev/guide/testing/marble-testing#rxjs-code-that-consumes-promises-cannot-be-directly-tested
+    const result = await lastValueFrom(result$);
 
     // Assert
-    expect(result$).toBeObservable(cold('(a|)', { a: true }));
+    expect(result).toBe(true);
   });
 
-  it('should unsuccessfully call the verification endpoint', (): void => {
+  it('should unsuccessfully call the verification endpoint', async (): Promise<void> => {
     // Arrange
-    jest.spyOn(rxjsFetch, 'fromFetch').mockReturnValue(
-      of({
-        ok: false,
-      } as Response),
-    );
-
-    // Act
-    const result$ = service.validateToken('my-token');
-
-    // Assert
-    expect(result$).toBeObservable(cold('(a|)', { a: false }));
-  });
-
-  it('should handle a thrown error', (): void => {
-    // Arrange
-    jest
-      .spyOn(rxjsFetch, 'fromFetch')
-      .mockReturnValue(throwError(() => new Error('DNS lookup failed')));
+    nock('https://challenges.cloudflare.com')
+      .post('/turnstile/v0/siteverify')
+      .reply(400, { success: false });
+    // Swallow error logs
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     jest.spyOn(console, 'error').mockImplementation(() => {});
 
     // Act
     const result$ = service.validateToken('my-token');
+    // Cannot use marbles: https://rxjs.dev/guide/testing/marble-testing#rxjs-code-that-consumes-promises-cannot-be-directly-tested
+    const result = await lastValueFrom(result$);
 
     // Assert
-    expect(result$).toBeObservable(cold('(a|)', { a: false }));
+    expect(result).toBe(false);
+  });
+
+  it('should handle an thrown error', async (): Promise<void> => {
+    // Arrange
+    nock('https://challenges.cloudflare.com')
+      .post('/turnstile/v0/siteverify')
+      .replyWithError('Internal server error');
+    // Swallow error logs
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    // Act
+    const result$ = service.validateToken('my-token');
+    // Cannot use marbles: https://rxjs.dev/guide/testing/marble-testing#rxjs-code-that-consumes-promises-cannot-be-directly-tested
+    const result = await lastValueFrom(result$);
+
+    // Assert
+    expect(result).toBe(false);
   });
 });

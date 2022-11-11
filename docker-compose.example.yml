@@ -1,0 +1,19 @@
+version: '3.9'
+services:
+  web:
+    build:
+      context: .
+      target: dev
+    ports: 
+      - 9000:8080
+      - 9229:9229 # debugger
+    environment:
+      CaptchaEnabled: true
+      CaptchaFieldName: cfTurnstileResponse
+      CaptchaSecretKeyParameterPath: '/cloudflare/ContactFormHandler/TURNSTILE_SECRET_KEY'
+      EmailSubjectSuffix: '| ACME Corp'
+      ValidatedEmailAddress: admin@acme.com
+    volumes:
+         - ~/.aws:/root/.aws:ro # AWS credentials
+         - ./dist:/var/task
+         - ./node_modules:/var/task/node_modules
