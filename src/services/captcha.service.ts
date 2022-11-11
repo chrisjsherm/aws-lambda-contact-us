@@ -27,7 +27,6 @@ export class CaptchaService {
       .getParameterValue(secretKeyParameterPath, true)
       .pipe(
         tap((value: string): void => {
-          console.log(`Secret key: ${value.substring(0, 2)}`);
           this.secretKey.next(value);
         }),
         take(1),
