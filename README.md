@@ -41,7 +41,7 @@ adjust the environment variables in `docker-compose.yml` as needed.
 
 ```
 curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" \
-  -d '{"fromName": "Jane", "fromEmailAddress": "jdoe@mail.com", "subject": "Party", "message": "Party this weekend!"'
+  -d '{"fromName": "Jane", "fromEmailAddress": "jdoe@mail.com", "subject": "Party", "message": "Party this weekend!"}'
 ```
 
 5. Run `docker compose down`. This stops the Lambda Fn container.
