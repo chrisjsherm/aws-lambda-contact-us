@@ -21,6 +21,7 @@ export class EmailService {
   async sendMessage(email: IEmail): Promise<string | undefined> {
     const emailParams: SendEmailCommandInput = {
       Source: email.sourceEmailAddress.toString(),
+      ReturnPath: email.sourceEmailAddress.toString(),
       ReplyToAddresses: email.replyToEmailAddresses.map(
         (address: EmailAddress): string => address.toString(),
       ),
