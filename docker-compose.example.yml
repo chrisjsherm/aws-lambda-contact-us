@@ -8,7 +8,7 @@ services:
       - 9000:8080
       - 9229:9229 # debugger
     environment:
-      CaptchaEnabled: true
+      CaptchaEnabled: false
       CaptchaFieldName: cfTurnstileResponse
       CaptchaSecretKeyParameterPath: '/cloudflare/ContactFormHandler/TURNSTILE_SECRET_KEY'
       EmailSubjectSuffix: '| ACME Corp'
