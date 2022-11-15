@@ -9,15 +9,6 @@ Docker image.
 > Note: The handler assumes you are calling the Lambda function directly by
 > configuring a Lambda function URL rather than proxying through an API Gateway.
 
-## Configuration
-
-The handler assumes you configured a Lambda environment variable named
-`ValidatedEmailAddress` and set its value to a valid email address that you have
-[pre-verified with AWS SES](https://docs.aws.amazon.com/ses/latest/dg/creating-identities.html#verify-email-addresses-procedure).
-
-The JSON payload of the POST request must match the shape of
-`src/models/contact-form-us.interface.ts`.
-
 ## CloudFormation
 
 This repository is designed to be referenced by a
@@ -25,6 +16,16 @@ This repository is designed to be referenced by a
 To use with the template, fork this repository and
 use the HTTPS clone link to set the `GitHubSourceHTTPS` parameter in the
 CloudFormation template.
+
+## Configuration
+
+The handler assumes CloudFormation has configured Lambda environment variables.
+The `ValidatedEmailAddress` environment requires its value be an email address
+that you have
+[pre-verified with AWS SES](https://docs.aws.amazon.com/ses/latest/dg/creating-identities.html#verify-email-addresses-procedure).
+
+The JSON payload of the POST request must match the shape of
+`src/models/contact-form-us.interface.ts`.
 
 ## Development
 
@@ -68,5 +69,5 @@ Run tests via `npm run test`.
 
 ## Helper scripts
 
-The `shell-scripts` directory contains several scripts for managing the Docker
+The `shell-scripts` directory contains scripts for managing the Docker
 image lifecycle.
