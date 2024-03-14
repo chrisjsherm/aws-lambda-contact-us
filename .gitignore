@@ -1,8 +1,9 @@
+todo.*
+.env
+
 build-cache
 coverage
 dist
 .eslintcache
 node_modules
 
-todo.txt
-docker-compose.yml
