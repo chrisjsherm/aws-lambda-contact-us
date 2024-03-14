@@ -29,8 +29,13 @@ The JSON payload of the POST request must match the shape of
 
 ## Development
 
-Ensure you have an `~/.aws/credentials` file, Docker running, and Node/NPM
-installed. Rename `docker-compose.example.yml` to `docker-compose.yml` and
+Ensure you have
+
+1. An `~/.aws/credentials` file
+2. Docker running
+3. Node/NPM installed.
+
+Rename `docker-compose.example.yml` to `docker-compose.yml` and
 adjust the environment variables in `docker-compose.yml` as needed.
 
 1. Run `npm install`. This installs dependencies.
