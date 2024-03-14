@@ -35,11 +35,10 @@ Ensure you have
 2. Docker running
 3. Node/NPM installed.
 
-Rename `docker-compose.example.yml` to `docker-compose.yml` and
-adjust the environment variables in `docker-compose.yml` as needed.
+Adjust the environment variables in `.env` as needed.
 
 1. Run `npm install`. This installs dependencies.
-2. Run `docker compose up -d`. This starts the Lambda Fn container.
+2. Run `docker compose up`. This starts the Lambda Fn container.
 3. Run `npm run build:live`. This starts TypeScript transpilation in watch mode and
    starts a Docker container. When you modify code in the `src` directory,
    the container will briefly go down while it restarts.
